@@ -21,11 +21,11 @@ app.get('/shouldBuy', async function (request, response) {
   }
 
   var candle = await helper.getCandle(kraken, pair);
-  var shouldBuy = helper.shouldPlaceOrder(candle,signal,factor);
+  var shouldPlaceOrderResult = helper.shouldPlaceOrder(candle,signal,factor);
 
   response.setHeader('Content-Type', 'application/json');
   response.send(JSON.stringify({
-    "shouldBuy": shouldBuy
+    "result": shouldPlaceOrderResult
   }));
 })
 

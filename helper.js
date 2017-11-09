@@ -1,39 +1,49 @@
-exports.extract = function (menu, today)
-{
-    var result = "Heute beim Tresor: \n";
-    menu.reduce((initvalue, currentValue, i, array) => {
-      if (currentValue === today) {
-        //let´s see what happens if they don´t have tagesmenu on a specific day.
-        result += array[i + 1] + "\n";
-      }
-      if (currentValue === "Täglich") {
-        //assuming there are always 3 tagesgerichte
-        result += array[i + 1] + "\n" + menu[i + 2] + "\n" + menu[i + 3];
-      }
-    }, 1);
-    return result;
-}
+exports.shouldPlaceOrder = function (candle, signal, factor) {
 
-exports.getDay = function (dayAsNumber)
-{
-  var day = "Sonntag";
-  if (dayAsNumber === 1) day = "Montag";
-  if (dayAsNumber === 2) day = "Dienstag";
-  if (dayAsNumber === 3) day = "Mittwoch";
-  if (dayAsNumber === 4) day = "Donnerstag";
-  if (dayAsNumber === 5) day = "Freitag";
-  return day;
-}
+  const low_gap = Math.abs(((candle.close / candle.low) - 1) * 100);
+  const high_gap = Math.abs(((candle.close / candle.high) - 1) * 100);
+  const spread = low_gap + high_gap;
+  const factored_high_gap = high_gap * factor;
 
-exports.getMenu = function (menuAsText)
-{
-  var splitted = menuAsText.split(/\n/g);
-  var menu = [];
-  splitted.forEach(function (element) {
-    if (element != " \r") {
-      menu.push(element.replace(" \r", ""));
+  var shouldBuy = false;
+  if (spread > signal) {
+    if (factored_high_gap > spread) {
+      shouldBuy = true;
     }
-  });
-  return menu;
+  }
+  result = 
+  {
+    candle : candle,
+    high_gap : high_gap,
+    low_gap : low_gap,
+    factored_high_gap : factored_high_gap,
+    shouldBuy : shouldBuy
+  }
+  return result;
 }
 
+exports.getCandle = async function (kraken, pair) {
+
+  var now = Date.now();
+  var fourHourAgo = 4 * 60 * 60 * 1000;
+  var startTime = (now - fourHourAgo) / 1000;
+
+  var ohlcResponse = await kraken.api('OHLC', { pair: pair, interval: 240, since: startTime });
+
+  if (ohlcResponse.result[pair].length > 1) {
+    console.error(ohlcResponse.result[pair].length + " candles for : " + pair);
+    return;
+  }
+  var candle = convertResponseToCandle(ohlcResponse, pair);
+
+  return candle;
+}
+
+function convertResponseToCandle(response, pair) {
+  var result = response.result[pair][0];
+  var high = result[2] * 1;
+  var low = result[3] * 1;
+  var close = result[4] * 1;
+  // * 1 to convert string to number		
+  return { high: high, low: low, close: close, pair: pair }
+} 

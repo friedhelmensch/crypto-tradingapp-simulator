@@ -8,7 +8,9 @@
     "test": "mocha"
   },
   "dependencies": {
-    "express": "^4.13.3"
+    "express": "^4.13.3",
+    "express-async-await": "^1.1.0",
+    "kraken-api": "^1.0.0"
   },
   "engines": {
     "node": "4.7.0"

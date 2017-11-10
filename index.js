@@ -5,6 +5,9 @@ const helper = require('./helper');
 const KrakenClient = require('kraken-api');
 const kraken = new KrakenClient("not", "applicable");
 
+var allowCrossDomain = function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+};
 
 app.set('port', (process.env.PORT || 5000))
 app.use(express.static(__dirname + '/public'))
@@ -22,7 +25,8 @@ app.get('/shouldBuy', async function (request, response) {
 
   var candle = await helper.getCandle(kraken, pair);
   var shouldPlaceOrderResult = helper.shouldPlaceOrder(candle,signal,factor);
-
+  
+  response.setHeader('Access-Control-Allow-Origin', '*');
   response.setHeader('Content-Type', 'application/json');
   response.send(JSON.stringify({
     "result": shouldPlaceOrderResult

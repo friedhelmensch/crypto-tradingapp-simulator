@@ -1,4 +1,4 @@
-# Tresorticker
+# Cryptotrading-App-Simulator
 
 A barebones Node.js app using [Express](http://expressjs.com/) to check if a set of crypto trading parameters would lead to a buy or no buy decision of the trading engine. 
 
